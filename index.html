@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>Form URL Selector</title>
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; }
@@ -24,31 +24,34 @@
 </div>
 
 <script>
-    const data = {
-        "Form 1": "https://example.com/form1",
-        "Form 2": "https://example.com/form2"
-        // Add up to 215 entries here
-    };
-
     const dropdown = document.getElementById("dropdown");
-    for (const [label, url] of Object.entries(data)) {
-        const opt = document.createElement("option");
-        opt.value = label;
-        opt.textContent = label;
-        dropdown.appendChild(opt);
-    }
+    const formLink = document.getElementById("formLink");
+    const urlDisplay = document.getElementById("urlDisplay");
+    let formMap = {};
+
+    // Load CSV
+    fetch("signInMapping.csv")
+        .then(response => response.text())
+        .then(text => {
+            const rows = text.trim().split("\n");
+            for (let i = 1; i < rows.length; i++) { // skip header
+                const [label, url] = rows[i].split(",");
+                formMap[label] = url;
+                const option = document.createElement("option");
+                option.value = label;
+                option.textContent = label;
+                dropdown.appendChild(option);
+            }
+        });
 
     function showURL() {
         const selected = dropdown.value;
-        const link = document.getElementById("formLink");
-        const display = document.getElementById("urlDisplay");
-
-        if (data[selected]) {
-            link.href = data[selected];
-            link.textContent = data[selected];
-            display.style.display = "block";
+        if (formMap[selected]) {
+            formLink.href = formMap[selected];
+            formLink.textContent = formMap[selected];
+            urlDisplay.style.display = "block";
         } else {
-            display.style.display = "none";
+            urlDisplay.style.display = "none";
         }
     }
 </script>
