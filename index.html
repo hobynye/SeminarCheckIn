@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Form URL Selector</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        label, select, p { margin-bottom: 10px; display: block; }
+        #urlDisplay { margin-top: 10px; font-weight: bold; color: blue; }
+    </style>
+</head>
+<body>
+
+<h2>Select a Form</h2>
+
+<label for="dropdown">Choose an option:</label>
+<select id="dropdown" onchange="showURL()">
+    <option value="">--Select--</option>
+</select>
+
+<div id="urlDisplay" style="display:none;">
+    <p>Here is your form URL:</p>
+    <a href="#" id="formLink" target="_blank"></a>
+</div>
+
+<script>
+    const data = {
+        "Form 1": "https://example.com/form1",
+        "Form 2": "https://example.com/form2"
+        // Add up to 215 entries here
+    };
+
+    const dropdown = document.getElementById("dropdown");
+    for (const [label, url] of Object.entries(data)) {
+        const opt = document.createElement("option");
+        opt.value = label;
+        opt.textContent = label;
+        dropdown.appendChild(opt);
+    }
+
+    function showURL() {
+        const selected = dropdown.value;
+        const link = document.getElementById("formLink");
+        const display = document.getElementById("urlDisplay");
+
+        if (data[selected]) {
+            link.href = data[selected];
+            link.textContent = data[selected];
+            display.style.display = "block";
+        } else {
+            display.style.display = "none";
+        }
+    }
+</script>
+
+</body>
+</html>
