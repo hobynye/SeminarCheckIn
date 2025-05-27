@@ -36,24 +36,23 @@
         return { last, first };
     }
 
-    // Load CSV
     fetch("signInMapping.csv")
         .then(response => response.text())
         .then(text => {
             const rows = text.trim().split("\n");
             const entries = [];
 
-            for (let i = 1; i < rows.length; i++) { // skip header
+            for (let i = 1; i < rows.length; i++) {
                 const [label, url] = rows[i].split(",");
                 const { last, first } = getLastFirst(label);
                 entries.push({ label, url, last, first });
             }
 
-            // Sort by Last name DESC, then First name DESC
+            // Sort by Last name ASC, then First name ASC
             entries.sort((a, b) => {
-                if (a.last < b.last) return 1;
-                if (a.last > b.last) return -1;
-                return b.first.localeCompare(a.first);
+                if (a.last < b.last) return -1;
+                if (a.last > b.last) return 1;
+                return a.first.localeCompare(b.first);
             });
 
             for (const entry of entries) {
