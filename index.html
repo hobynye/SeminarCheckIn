@@ -5,7 +5,7 @@
     <title>Form URL Selector</title>
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; }
-        label, select, p { margin-bottom: 10px; display: block; }
+        label, input, select, p { margin-bottom: 10px; display: block; }
         #urlDisplay { margin-top: 10px; font-weight: bold; color: blue; }
     </style>
 </head>
@@ -13,7 +13,10 @@
 
 <h2>Select a Form</h2>
 
-<label for="dropdown">Choose a name:</label>
+<label for="searchInput">Search for your name:</label>
+<input type="text" id="searchInput" placeholder="Type your name..." oninput="filterDropdown()" />
+
+<label for="dropdown">Matching names:</label>
 <select id="dropdown" onchange="showURL()">
     <option value="">--Select--</option>
 </select>
@@ -27,6 +30,9 @@
     const dropdown = document.getElementById("dropdown");
     const formLink = document.getElementById("formLink");
     const urlDisplay = document.getElementById("urlDisplay");
+    const searchInput = document.getElementById("searchInput");
+
+    let formEntries = [];
     let formMap = {};
 
     function getLastFirst(fullName) {
@@ -48,21 +54,38 @@
                 entries.push({ label, url, last, first });
             }
 
-            // Sort by Last name ASC, then First name ASC
+            // Sort by Last ASC, then First ASC
             entries.sort((a, b) => {
                 if (a.last < b.last) return -1;
                 if (a.last > b.last) return 1;
                 return a.first.localeCompare(b.first);
             });
 
+            formEntries = entries;
             for (const entry of entries) {
                 formMap[entry.label] = entry.url;
-                const option = document.createElement("option");
-                option.value = entry.label;
-                option.textContent = entry.label;
-                dropdown.appendChild(option);
             }
+
+            populateDropdown(entries);
         });
+
+    function populateDropdown(entries) {
+        dropdown.innerHTML = '<option value="">--Select--</option>';
+        for (const entry of entries) {
+            const option = document.createElement("option");
+            option.value = entry.label;
+            option.textContent = entry.label;
+            dropdown.appendChild(option);
+        }
+    }
+
+    function filterDropdown() {
+        const search = searchInput.value.toLowerCase();
+        const filtered = formEntries.filter(entry =>
+            entry.label.toLowerCase().includes(search)
+        );
+        populateDropdown(filtered);
+    }
 
     function showURL() {
         const selected = dropdown.value;
