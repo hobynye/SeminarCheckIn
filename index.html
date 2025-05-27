@@ -13,7 +13,7 @@
 
 <h2>Select a Form</h2>
 
-<label for="dropdown">Choose an option:</label>
+<label for="dropdown">Choose a name:</label>
 <select id="dropdown" onchange="showURL()">
     <option value="">--Select--</option>
 </select>
@@ -29,17 +29,38 @@
     const urlDisplay = document.getElementById("urlDisplay");
     let formMap = {};
 
+    function getLastFirst(fullName) {
+        const parts = fullName.trim().split(" ");
+        const last = parts[parts.length - 1].toLowerCase();
+        const first = parts.slice(0, -1).join(" ").toLowerCase();
+        return { last, first };
+    }
+
     // Load CSV
     fetch("signInMapping.csv")
         .then(response => response.text())
         .then(text => {
             const rows = text.trim().split("\n");
+            const entries = [];
+
             for (let i = 1; i < rows.length; i++) { // skip header
                 const [label, url] = rows[i].split(",");
-                formMap[label] = url;
+                const { last, first } = getLastFirst(label);
+                entries.push({ label, url, last, first });
+            }
+
+            // Sort by Last name DESC, then First name DESC
+            entries.sort((a, b) => {
+                if (a.last < b.last) return 1;
+                if (a.last > b.last) return -1;
+                return b.first.localeCompare(a.first);
+            });
+
+            for (const entry of entries) {
+                formMap[entry.label] = entry.url;
                 const option = document.createElement("option");
-                option.value = label;
-                option.textContent = label;
+                option.value = entry.label;
+                option.textContent = entry.label;
                 dropdown.appendChild(option);
             }
         });
