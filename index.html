@@ -2,44 +2,176 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Volunteer Service Tracker</title>
-    <script src="https://www.gstatic.com/firebasejs/10.5.2/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.5.2/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.5.2/firebase-firestore.js"></script>
-    <link rel="stylesheet" href="style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Service Hours Logging</title>
 </head>
 <body>
-<div id="auth-section">
-    <button onclick="login()">Login with Google</button>
-    <button onclick="logout()">Logout</button>
-    <p id="user-info"></p>
-</div>
+<h1>Service Hours Logging</h1>
 
-<div id="forms-section" style="display:none;">
+<button id="login-btn">Login with Google</button>
+<button id="logout-btn" style="display:none;">Logout</button>
+<div id="user-info"></div>
+
+<div id="log-container" style="display: none;">
     <h2>Log Service Hours</h2>
-    <form id="hours-form">
-        <input type="date" id="date" required />
-        <input type="number" id="hours" placeholder="Hours" required />
-        <textarea id="description" placeholder="Description" required></textarea>
-        <select id="organization-select"></select>
-        <button type="submit">Log Hours</button>
-    </form>
 
-    <h2>Add Organization</h2>
-    <form id="org-form">
-        <input type="text" id="org-name" placeholder="Organization Name" required />
-        <input type="text" id="org-address" placeholder="Address" required />
-        <input type="text" id="contact-first" placeholder="Contact First Name" required />
-        <input type="text" id="contact-last" placeholder="Contact Last Name" required />
-        <input type="text" id="contact-title" placeholder="Title" required />
-        <input type="email" id="contact-email" placeholder="Email" required />
-        <input type="tel" id="contact-phone" placeholder="Phone" required />
-        <button type="submit">Add Organization</button>
+    <form id="log-form">
+        <label for="log-date">Date: <input type="date" id="log-date" required /></label><br/>
+        <label for="log-hours">Hours: <input type="number" id="log-hours" step="0.1" required /></label><br/>
+
+        <label>Select Organization:
+            <select id="org-select">
+                <option value="">-- Add new organization --</option>
+            </select>
+        </label><br/>
+
+        <div id="new-org-fields">
+            <label>Organization Name: <input type="text" id="org-name" readonly /></label><br/>
+            <label>Address: <input type="text" id="org-address" readonly /></label><br/>
+            <label>Contact First Name: <input type="text" id="contact-first" readonly /></label><br/>
+            <label>Contact Last Name: <input type="text" id="contact-last" readonly /></label><br/>
+            <label>Title: <input type="text" id="contact-title" readonly /></label><br/>
+            <label>Email: <input type="email" id="contact-email" readonly /></label><br/>
+            <label>Phone: <input type="tel" id="contact-phone" readonly /></label><br/>
+        </div>
+
+        <button type="submit">Submit</button>
     </form>
 </div>
 
-<script src="firebase-config.js"></script>
-<script src="app.js"></script>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDoc, doc, getDocs } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-firestore.js";
+    import { firebaseConfig } from './firebase-config.js';
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const loginBtn = document.getElementById("login-btn");
+    const logoutBtn = document.getElementById("logout-btn");
+
+    loginBtn.onclick = async () => {
+        const provider = new GoogleAuthProvider();
+        try {
+            await signInWithPopup(auth, provider);
+        } catch (error) {
+            alert("Login failed: " + error.message);
+        }
+    };
+
+    logoutBtn.onclick = async () => {
+        await signOut(auth);
+    };
+
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            document.getElementById("user-info").textContent = `Welcome, ${user.displayName}`;
+            document.getElementById("log-container").style.display = "block";
+            loginBtn.style.display = "none";
+            logoutBtn.style.display = "inline";
+
+            populateOrganizations();
+        } else {
+            document.getElementById("user-info").textContent = "";
+            document.getElementById("log-container").style.display = "none";
+            loginBtn.style.display = "inline";
+            logoutBtn.style.display = "none";
+        }
+    });
+
+    async function populateOrganizations() {
+        const orgSelect = document.getElementById("org-select");
+        orgSelect.innerHTML = `<option value="">-- Add new organization --</option>`;
+        const snapshot = await getDocs(collection(db, "organizations"));
+        snapshot.forEach(doc => {
+            const opt = document.createElement("option");
+            opt.value = doc.id;
+            opt.textContent = doc.data().name;
+            orgSelect.appendChild(opt);
+        });
+    }
+
+    document.getElementById("org-select").addEventListener("change", async (e) => {
+        const orgId = e.target.value;
+        const isNew = orgId === "";
+        const fields = [
+            "org-name", "org-address",
+            "contact-first", "contact-last",
+            "contact-title", "contact-email", "contact-phone"
+        ];
+
+        document.getElementById("new-org-fields").style.display = "block";
+
+        if (isNew) {
+            fields.forEach(id => {
+                const el = document.getElementById(id);
+                el.value = "";
+                el.readOnly = false;
+            });
+        } else {
+            const docSnap = await getDoc(doc(db, "organizations", orgId));
+            if (docSnap.exists()) {
+                const org = docSnap.data();
+                document.getElementById("org-name").value = org.name || "";
+                document.getElementById("org-address").value = org.address || "";
+                const c = org.contact || {};
+                document.getElementById("contact-first").value = c.firstName || "";
+                document.getElementById("contact-last").value = c.lastName || "";
+                document.getElementById("contact-title").value = c.title || "";
+                document.getElementById("contact-email").value = c.email || "";
+                document.getElementById("contact-phone").value = c.phone || "";
+
+                fields.forEach(id => {
+                    document.getElementById(id).readOnly = true;
+                });
+            }
+        }
+    });
+
+    document.getElementById("log-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const user = auth.currentUser;
+        if (!user) {
+            alert("Please log in.");
+            return;
+        }
+
+        const orgSelect = document.getElementById("org-select");
+        const selectedOrg = orgSelect.value;
+        let orgId;
+
+        if (selectedOrg) {
+            orgId = selectedOrg;
+        } else {
+            const orgRef = collection(db, "organizations");
+            const newOrg = await addDoc(orgRef, {
+                name: document.getElementById("org-name").value,
+                address: document.getElementById("org-address").value,
+                contact: {
+                    firstName: document.getElementById("contact-first").value,
+                    lastName: document.getElementById("contact-last").value,
+                    title: document.getElementById("contact-title").value,
+                    email: document.getElementById("contact-email").value,
+                    phone: document.getElementById("contact-phone").value,
+                }
+            });
+            orgId = newOrg.id;
+            await populateOrganizations();
+            document.getElementById("org-select").value = orgId;
+        }
+
+        await addDoc(collection(db, "users", user.uid, "hours"), {
+            date: document.getElementById("log-date").value,
+            hours: parseFloat(document.getElementById("log-hours").value),
+            organizationId: orgId,
+            timestamp: new Date()
+        });
+
+        alert("Service hours logged.");
+        document.getElementById("log-form").reset();
+    });
+</script>
 </body>
 </html>
