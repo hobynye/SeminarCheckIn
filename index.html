@@ -2,181 +2,44 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <title>Welcome to HOBY NY East</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <style>
-        :root {
-            --primary: #0055A4;
-            --accent: #FFD700;
-            --bg: #f8f9fa;
-            --text: #212529;
-            --border-radius: 8px;
-        }
-
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 2rem;
-            line-height: 1.6;
-            text-align: center;
-        }
-
-        .form-container {
-            max-width: 500px;
-            margin: 0 auto;
-            background: white;
-            padding: 2rem;
-            border-radius: var(--border-radius);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-        }
-
-        img.logo {
-            max-width: 200px;
-            margin-bottom: 1rem;
-        }
-
-        h2 {
-            color: var(--primary);
-            margin-bottom: 1rem;
-        }
-
-        label {
-            font-weight: 600;
-            text-align: left;
-            display: block;
-        }
-
-        input[type="text"],
-        select {
-            width: 100%;
-            padding: 0.6rem;
-            margin-bottom: 1rem;
-            border: 1px solid #ccc;
-            border-radius: var(--border-radius);
-            font-size: 1rem;
-        }
-
-        input:focus,
-        select:focus {
-            outline: 2px solid var(--primary);
-            border-color: var(--primary);
-        }
-
-        #urlDisplay {
-            display: none;
-            margin-top: 1rem;
-            background-color: #eef;
-            padding: 1rem;
-            border-radius: var(--border-radius);
-        }
-
-        a#formLink {
-            word-break: break-word;
-            color: var(--primary);
-            font-weight: bold;
-        }
-    </style>
+    <title>Volunteer Service Tracker</title>
+    <script src="https://www.gstatic.com/firebasejs/10.5.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.5.2/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.5.2/firebase-firestore.js"></script>
+    <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
-<div class="form-container" role="form" aria-labelledby="title">
-    <img src="hoby-logo.png" alt="HOBY NY East logo" class="logo" />
-
-    <h2 id="title">Welcome to HOBY NY East</h2>
-
-    <label for="searchInput">Please sign in here:</label>
-    <input type="text" id="searchInput" placeholder="Type your name..." oninput="filterDropdown()" aria-label="Search for your name" />
-
-    <label for="dropdown">Matching names:</label>
-    <select id="dropdown" onchange="showURL()" aria-label="Select your name from matching options">
-        <option value="">--Select--</option>
-    </select>
-
-    <div id="urlDisplay" aria-live="polite">
-        <p>Here is your form URL:</p>
-        <a href="#" id="formLink" target="_blank" rel="noopener noreferrer"></a>
-    </div>
+<div id="auth-section">
+    <button onclick="login()">Login with Google</button>
+    <button onclick="logout()">Logout</button>
+    <p id="user-info"></p>
 </div>
 
-<script>
-    const dropdown = document.getElementById("dropdown");
-    const formLink = document.getElementById("formLink");
-    const urlDisplay = document.getElementById("urlDisplay");
-    const searchInput = document.getElementById("searchInput");
+<div id="forms-section" style="display:none;">
+    <h2>Log Service Hours</h2>
+    <form id="hours-form">
+        <input type="date" id="date" required />
+        <input type="number" id="hours" placeholder="Hours" required />
+        <textarea id="description" placeholder="Description" required></textarea>
+        <select id="organization-select"></select>
+        <button type="submit">Log Hours</button>
+    </form>
 
-    let formEntries = [];
-    let formMap = {};
+    <h2>Add Organization</h2>
+    <form id="org-form">
+        <input type="text" id="org-name" placeholder="Organization Name" required />
+        <input type="text" id="org-address" placeholder="Address" required />
+        <input type="text" id="contact-first" placeholder="Contact First Name" required />
+        <input type="text" id="contact-last" placeholder="Contact Last Name" required />
+        <input type="text" id="contact-title" placeholder="Title" required />
+        <input type="email" id="contact-email" placeholder="Email" required />
+        <input type="tel" id="contact-phone" placeholder="Phone" required />
+        <button type="submit">Add Organization</button>
+    </form>
+</div>
 
-    function getLastFirst(fullName) {
-        const parts = fullName.trim().split(" ");
-        const last = parts[parts.length - 1].toLowerCase();
-        const first = parts.slice(0, -1).join(" ").toLowerCase();
-        return { last, first };
-    }
-
-    fetch("signInMapping.csv")
-        .then(response => response.text())
-        .then(text => {
-            const rows = text.trim().split("\n");
-            const entries = [];
-
-            for (let i = 1; i < rows.length; i++) {
-                const [label, url] = rows[i].split(",");
-                const { last, first } = getLastFirst(label);
-                entries.push({ label, url, last, first });
-            }
-
-            entries.sort((a, b) => {
-                if (a.last < b.last) return -1;
-                if (a.last > b.last) return 1;
-                return a.first.localeCompare(b.first);
-            });
-
-            formEntries = entries;
-            for (const entry of entries) {
-                formMap[entry.label] = entry.url;
-            }
-
-            populateDropdown(entries);
-        });
-
-    function populateDropdown(entries) {
-        dropdown.innerHTML = '<option value="">--Select--</option>';
-        for (const entry of entries) {
-            const option = document.createElement("option");
-            option.value = entry.label;
-            option.textContent = entry.label;
-            dropdown.appendChild(option);
-        }
-    }
-
-    function filterDropdown() {
-        const search = searchInput.value.toLowerCase();
-        const filtered = formEntries.filter(entry =>
-            entry.label.toLowerCase().includes(search)
-        );
-        populateDropdown(filtered);
-
-        if (filtered.length === 1) {
-            dropdown.value = filtered[0].label;
-            showURL();
-            window.open(filtered[0].url, "_blank");
-        }
-    }
-
-    function showURL() {
-        const selected = dropdown.value;
-        if (formMap[selected]) {
-            formLink.href = formMap[selected];
-            formLink.textContent = formMap[selected];
-            urlDisplay.style.display = "block";
-        } else {
-            urlDisplay.style.display = "none";
-        }
-    }
-</script>
-
+<script src="firebase-config.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
