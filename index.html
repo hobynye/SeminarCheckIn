@@ -103,6 +103,11 @@
             margin: 2px 4px 2px 0;
         }
 
+        .divider {
+            margin: 2rem 0;
+            border-top: 1px solid #ccc;
+        }
+
         @media (max-width: 480px) {
             body {
                 padding: 0.5rem;
@@ -128,6 +133,7 @@
     <img src="hoby-logo.png" alt="HOBY NY East logo" class="logo" />
     <h2>Welcome to HOBY NY East</h2>
 
+    <!-- Standard workflow entry -->
     <label for="searchInput">Please sign in here:</label>
     <input type="text" id="searchInput" placeholder="Type your name..." oninput="filterDropdown()" />
 
@@ -142,140 +148,58 @@
         <button onclick="handleNameConfirmation(false)">No, go back</button>
     </div>
 
-    <div id="lunchSection" class="hidden">
-        <h3>Sunday Boxed Lunch Selection</h3>
-        <form id="lunchForm" onsubmit="submitLunch(event)">
+    <div class="divider"></div>
+
+    <!-- Ad hoc form access -->
+    <button onclick="toggleQuickForm()">I'm HOBY Staff and not on the list</button>
+    <div id="quickForm" class="hidden">
+        <p><strong>This option is for HOBY staff only.</strong> You must be logged in with your <code>@hobynye.org</code> Google account.</p>
+        <form id="quickLunchForm" onsubmit="submitQuickLunch(event)">
+            <label for="quickName">Your Full Name</label>
+            <input type="text" id="quickName" name="quickName" required />
+
+            <!-- Duplicate lunch options from main form -->
             <label class="lunch-label">
-                <input type="radio" name="lunch" value="Grilled Chicken Caesar Wrap" required />
-                Grilled Chicken Caesar Wrap
-                <div class="lunch-description">
-                    Grilled chicken with romaine, parmesan, Caesar dressing and croutons in a hearty grain tortilla<br>
-                    <strong>Contains:</strong>
-                    <span class="allergen-icon">Eggs</span>
-                    <span class="allergen-icon">Fish</span>
-                    <span class="allergen-icon">Gluten</span>
-                    <span class="allergen-icon">Milk</span>
-                    <span class="allergen-icon">MSG</span>
-                    <span class="allergen-icon">Mustard</span>
-                    <span class="allergen-icon">Soybean</span>
-                    <span class="allergen-icon">Sulphites</span>
-                    <span class="allergen-icon">Wheat</span>
-                </div>
+                <input type="radio" name="lunch" value="Grilled Chicken Caesar Wrap" required /> Grilled Chicken Caesar Wrap
+                <div class="lunch-description">Grilled chicken with romaine, parmesan, Caesar dressing and croutons in a hearty grain tortilla<br><strong>Contains:</strong> <span class="allergen-icon">Eggs</span> <span class="allergen-icon">Fish</span> <span class="allergen-icon">Gluten</span> <span class="allergen-icon">Milk</span> <span class="allergen-icon">MSG</span> <span class="allergen-icon">Mustard</span> <span class="allergen-icon">Soybean</span> <span class="allergen-icon">Sulphites</span> <span class="allergen-icon">Wheat</span></div>
             </label>
             <label class="lunch-label">
-                <input type="radio" name="lunch" value="Falafel, Tzatziki and Hummus Wrap" />
-                Falafel, Tzatziki and Hummus Wrap
-                <div class="lunch-description">
-                    Falafels with hummus, roasted red peppers, greens and lemon vinaigrette in a flour tortilla<br>
-                    <strong>Contains:</strong>
-                    <span class="allergen-icon">Gluten</span>
-                    <span class="allergen-icon">Milk</span>
-                    <span class="allergen-icon">Sesame</span>
-                    <span class="allergen-icon">Soybean</span>
-                    <span class="allergen-icon">Sulphites</span>
-                    <span class="allergen-icon">Wheat</span>
-                </div>
+                <input type="radio" name="lunch" value="Falafel, Tzatziki and Hummus Wrap" /> Falafel, Tzatziki and Hummus Wrap
+                <div class="lunch-description">Falafels with hummus, roasted red peppers, greens and lemon vinaigrette in a flour tortilla<br><strong>Contains:</strong> <span class="allergen-icon">Gluten</span> <span class="allergen-icon">Milk</span> <span class="allergen-icon">Sesame</span> <span class="allergen-icon">Soybean</span> <span class="allergen-icon">Sulphites</span> <span class="allergen-icon">Wheat</span></div>
             </label>
             <label class="lunch-label">
-                <input type="radio" name="lunch" value="Beef, Cheddar and Slaw Ciabatta" />
-                Beef, Cheddar and Slaw Ciabatta
-                <div class="lunch-description">
-                    Roast beef and cheddar cheese with horseradish and coleslaw on a ciabatta roll<br>
-                    <strong>Contains:</strong>
-                    <span class="allergen-icon">Eggs</span>
-                    <span class="allergen-icon">Fish</span>
-                    <span class="allergen-icon">Gluten</span>
-                    <span class="allergen-icon">Milk</span>
-                    <span class="allergen-icon">Mustard</span>
-                    <span class="allergen-icon">Soybean</span>
-                    <span class="allergen-icon">Wheat</span>
-                </div>
+                <input type="radio" name="lunch" value="Beef, Cheddar and Slaw Ciabatta" /> Beef, Cheddar and Slaw Ciabatta
+                <div class="lunch-description">Roast beef and cheddar cheese with horseradish and coleslaw on a ciabatta roll<br><strong>Contains:</strong> <span class="allergen-icon">Eggs</span> <span class="allergen-icon">Fish</span> <span class="allergen-icon">Gluten</span> <span class="allergen-icon">Milk</span> <span class="allergen-icon">Mustard</span> <span class="allergen-icon">Soybean</span> <span class="allergen-icon">Wheat</span></div>
             </label>
             <label class="lunch-label">
-                <input type="radio" name="lunch" value="Other" onclick="toggleOther(true)" />
-                OTHER - I have a dietary need that is not accommodated by these options.
+                <input type="radio" name="lunch" value="Other" onclick="toggleOther(true)" /> OTHER - I have a dietary need
             </label>
             <textarea id="otherDiet" class="hidden" placeholder="Please describe your dietary need"></textarea>
-            <button type="submit">Submit Lunch Choice</button>
+            <button type="submit">Submit Ad Hoc Lunch Choice</button>
         </form>
     </div>
 </div>
 
 <script>
-    const dropdown = document.getElementById("dropdown");
-    const searchInput = document.getElementById("searchInput");
-    const nameConfirmSection = document.getElementById("nameConfirmSection");
-    const confirmText = document.getElementById("confirmText");
-    const lunchSection = document.getElementById("lunchSection");
-    let otherDiet = null;
-
-    let formEntries = [];
-    let formMap = {};
-    let selectedName = "";
-
-    fetch("signInMapping.csv")
-        .then(response => response.text())
-        .then(text => {
-            const rows = text.trim().split("\n");
-            for (let i = 1; i < rows.length; i++) {
-                const [label, url] = rows[i].split(",");
-                formEntries.push({ label, url });
-                formMap[label] = url;
-            }
-            populateDropdown(formEntries);
-        });
-
-    function populateDropdown(entries) {
-        dropdown.innerHTML = '<option value="">--Select--</option>';
-        entries.forEach(entry => {
-            const option = document.createElement("option");
-            option.value = entry.label;
-            option.textContent = entry.label;
-            dropdown.appendChild(option);
-        });
+    function toggleQuickForm() {
+        document.getElementById("quickForm").classList.toggle("hidden");
     }
 
-    dropdown.addEventListener("change", () => {
-        const name = dropdown.value;
-        if (!name) return;
-        selectedName = name;
-        confirmText.textContent = `Are you ${name}?`;
-        nameConfirmSection.classList.remove("hidden");
-    });
-
-    function handleNameConfirmation(confirmed) {
-        if (confirmed) {
-            nameConfirmSection.classList.add("hidden");
-            lunchSection.classList.remove("hidden");
-            otherDiet = document.getElementById("otherDiet");
-        } else {
-            dropdown.value = "";
-            nameConfirmSection.classList.add("hidden");
-        }
-    }
-
-    function toggleOther(show) {
-        if (show && otherDiet) {
-            otherDiet.classList.remove("hidden");
-        } else if (otherDiet) {
-            otherDiet.classList.add("hidden");
-        }
-    }
-
-    function submitLunch(e) {
+    function submitQuickLunch(e) {
         e.preventDefault();
+        const name = document.getElementById("quickName").value.trim();
         const lunch = document.querySelector('input[name="lunch"]:checked').value;
-        const note = lunch === "Other" && otherDiet ? otherDiet.value.trim() : "";
+        const note = lunch === "Other" ? document.getElementById("otherDiet").value.trim() : "";
 
         fetch("https://script.google.com/macros/s/AKfycbzjaIkv-Fy2WkWUtPfDLv3lomF6kFjHucMU2rn64wKQAjHQNSDYS-kn7jV16SX-oPi8/exec", {
             method: "POST",
             mode: "no-cors",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name: selectedName, lunch, note })
+            body: JSON.stringify({ name, lunch, note })
         });
 
-        alert("Thank you! Your lunch choice has been submitted. You will now be redirected a form to verify your information.");
-        window.open(formMap[selectedName], "_blank");
+        alert("Thank you! Your lunch choice has been submitted.");
+        document.getElementById("quickLunchForm").reset();
     }
 </script>
 </body>
