@@ -91,6 +91,26 @@
             padding: 2px 6px;
             margin: 2px 4px 2px 0;
         }
+        .suggestions-list {
+            list-style: none;
+            padding: 0;
+            margin: 0.5rem 0 0;
+            border: 1px solid #ccc;
+            border-radius: var(--border-radius);
+            max-height: 200px;
+            overflow-y: auto;
+            background: white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            text-align: left;
+        }
+        .suggestions-list li {
+            padding: 0.5rem;
+            cursor: pointer;
+        }
+        .suggestions-list li:hover {
+            background-color: #f0f0f0;
+        }
+
         .divider {
             margin: 2rem 0;
             border-top: 1px solid #ccc;
@@ -117,13 +137,8 @@
     <img src="hoby-logo.png" alt="HOBY NY East logo" class="logo" />
     <h2>Welcome to HOBY NY East</h2>
 
-    <label for="searchInput">Please sign in here:</label>
-    <input type="text" id="searchInput" placeholder="Type your name..." oninput="filterDropdown()" />
-
-    <label for="dropdown">Matching names:</label>
-    <select id="dropdown">
-        <option value="">--Select--</option>
-    </select>
+    <input type="text" id="searchInput" placeholder="Start typing your name..." autocomplete="off" />
+    <ul id="suggestions" class="suggestions-list hidden"></ul>
 
     <div id="nameConfirmSection" class="hidden">
         <p id="confirmText"></p>
@@ -257,18 +272,31 @@
         }
     }
 
-    function filterDropdown() {
+    const suggestions = document.getElementById("suggestions");
+
+    searchInput.addEventListener("input", () => {
         const search = searchInput.value.toLowerCase();
-        const filtered = formEntries.filter(entry =>
+        const matches = formEntries.filter(entry =>
             entry.label.toLowerCase().includes(search)
         );
-        populateDropdown(filtered);
 
-        if (filtered.length === 1) {
-            dropdown.value = filtered[0].label;
-            showURL();
-            window.open(filtered[0].url, "_blank");
-        }
+        suggestions.innerHTML = "";
+        suggestions.classList.toggle("hidden", matches.length === 0);
+
+        matches.forEach(entry => {
+            const li = document.createElement("li");
+            li.textContent = entry.label;
+            li.onclick = () => selectName(entry.label);
+            suggestions.appendChild(li);
+        });
+    });
+
+    function selectName(name) {
+        selectedName = name;
+        searchInput.value = name;
+        suggestions.classList.add("hidden");
+        confirmText.textContent = `Are you ${name}?`;
+        nameConfirmSection.classList.remove("hidden");
     }
 
     function submitLunch(e) {
