@@ -287,7 +287,7 @@
     const lunch = document.querySelector('input[name="lunch"]:checked').value;
     const note = lunch === "Other" && otherDiet ? otherDiet.value.trim() : "";
 
-    fetch("https://script.google.com/macros/s/AKfycbzjaIkv-Fy2WkWUtPfDLv3lomF6kFjHucMU2rn64wKQAjHQNSDYS-kn7jV16SX-oPi8/exec", {
+    fetch("https://script.google.com/macros/s/AKfycby65uKmLC1a9X7LPcHrhphPSG-cmKRs2yUHyCDyVAjyzhYTgJezdAt_WXxHIvLvL7V0/exec", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: selectedName, lunch, note })
