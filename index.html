@@ -183,7 +183,7 @@
         const lunch = document.querySelector('input[name="lunch"]:checked').value;
         const note = lunch === "Other" ? otherDiet.value.trim() : "";
 
-        fetch("YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL", {
+        fetch("https://script.google.com/macros/s/AKfycbzjaIkv-Fy2WkWUtPfDLv3lomF6kFjHucMU2rn64wKQAjHQNSDYS-kn7jV16SX-oPi8/exec", {
             method: "POST",
             mode: "no-cors",
             headers: { "Content-Type": "application/json" },
