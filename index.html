@@ -12,7 +12,6 @@
             --text: #212529;
             --border-radius: 8px;
         }
-
         body {
             font-family: 'Segoe UI', sans-serif;
             background-color: var(--bg);
@@ -21,7 +20,6 @@
             padding: 1rem;
             text-align: center;
         }
-
         .form-container {
             width: 100%;
             max-width: 600px;
@@ -31,24 +29,20 @@
             border-radius: var(--border-radius);
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
         }
-
         img.logo {
             max-width: 150px;
             margin-bottom: 1rem;
         }
-
         h2 {
             color: var(--primary);
             font-size: 1.5rem;
         }
-
         label {
             font-weight: 600;
             display: block;
             margin-top: 1rem;
             text-align: left;
         }
-
         input[type="text"],
         select,
         textarea {
@@ -60,14 +54,11 @@
             font-size: 1rem;
             box-sizing: border-box;
         }
-
         input[type="radio"] {
             margin-right: 0.5rem;
         }
-
         .hidden { display: none; }
         .visible { display: block; }
-
         button {
             background-color: var(--primary);
             color: white;
@@ -79,20 +70,17 @@
             width: 100%;
             max-width: 300px;
         }
-
         .lunch-label {
             text-align: left;
             margin-top: 1rem;
             display: block;
         }
-
         .lunch-description {
             font-weight: normal;
             font-size: 0.9rem;
             color: #555;
             margin-left: 1.5rem;
         }
-
         .allergen-icon {
             display: inline-block;
             background-color: #eee;
@@ -102,25 +90,20 @@
             padding: 2px 6px;
             margin: 2px 4px 2px 0;
         }
-
         .divider {
             margin: 2rem 0;
             border-top: 1px solid #ccc;
         }
-
         @media (max-width: 480px) {
             body {
                 padding: 0.5rem;
             }
-
             h2 {
                 font-size: 1.2rem;
             }
-
             .form-container {
                 padding: 1rem;
             }
-
             button {
                 font-size: 0.95rem;
                 padding: 0.6rem;
@@ -157,19 +140,15 @@
         <form id="quickLunchForm" onsubmit="submitQuickLunch(event)">
             <label for="quickName">Your Full Name</label>
             <input type="text" id="quickName" name="quickName" required />
-
-            <!-- Duplicate lunch options from main form -->
+            <!-- Lunch options here -->
             <label class="lunch-label">
                 <input type="radio" name="lunch" value="Grilled Chicken Caesar Wrap" required /> Grilled Chicken Caesar Wrap
-                <div class="lunch-description">Grilled chicken with romaine, parmesan, Caesar dressing and croutons in a hearty grain tortilla<br><strong>Contains:</strong> <span class="allergen-icon">Eggs</span> <span class="allergen-icon">Fish</span> <span class="allergen-icon">Gluten</span> <span class="allergen-icon">Milk</span> <span class="allergen-icon">MSG</span> <span class="allergen-icon">Mustard</span> <span class="allergen-icon">Soybean</span> <span class="allergen-icon">Sulphites</span> <span class="allergen-icon">Wheat</span></div>
             </label>
             <label class="lunch-label">
                 <input type="radio" name="lunch" value="Falafel, Tzatziki and Hummus Wrap" /> Falafel, Tzatziki and Hummus Wrap
-                <div class="lunch-description">Falafels with hummus, roasted red peppers, greens and lemon vinaigrette in a flour tortilla<br><strong>Contains:</strong> <span class="allergen-icon">Gluten</span> <span class="allergen-icon">Milk</span> <span class="allergen-icon">Sesame</span> <span class="allergen-icon">Soybean</span> <span class="allergen-icon">Sulphites</span> <span class="allergen-icon">Wheat</span></div>
             </label>
             <label class="lunch-label">
                 <input type="radio" name="lunch" value="Beef, Cheddar and Slaw Ciabatta" /> Beef, Cheddar and Slaw Ciabatta
-                <div class="lunch-description">Roast beef and cheddar cheese with horseradish and coleslaw on a ciabatta roll<br><strong>Contains:</strong> <span class="allergen-icon">Eggs</span> <span class="allergen-icon">Fish</span> <span class="allergen-icon">Gluten</span> <span class="allergen-icon">Milk</span> <span class="allergen-icon">Mustard</span> <span class="allergen-icon">Soybean</span> <span class="allergen-icon">Wheat</span></div>
             </label>
             <label class="lunch-label">
                 <input type="radio" name="lunch" value="Other" onclick="toggleOther(true)" /> OTHER - I have a dietary need
@@ -181,6 +160,36 @@
 </div>
 
 <script>
+    let formEntries = [];
+    let formMap = {};
+
+    fetch("signInMapping.csv")
+        .then(response => response.text())
+        .then(text => {
+            const rows = text.trim().split("\n");
+            for (let i = 1; i < rows.length; i++) {
+                const [label, url] = rows[i].split(",");
+                formEntries.push({ label, url });
+                formMap[label] = url;
+            }
+            populateDropdown(formEntries);
+        })
+        .catch(err => {
+            alert("Failed to load dropdown list.");
+            console.error(err);
+        });
+
+    function populateDropdown(entries) {
+        const dropdown = document.getElementById("dropdown");
+        dropdown.innerHTML = '<option value="">--Select--</option>';
+        entries.forEach(entry => {
+            const option = document.createElement("option");
+            option.value = entry.label;
+            option.textContent = entry.label;
+            dropdown.appendChild(option);
+        });
+    }
+
     function toggleQuickForm() {
         document.getElementById("quickForm").classList.toggle("hidden");
     }
@@ -191,15 +200,20 @@
         const lunch = document.querySelector('input[name="lunch"]:checked').value;
         const note = lunch === "Other" ? document.getElementById("otherDiet").value.trim() : "";
 
-        fetch("https://script.google.com/macros/s/AKfycbzjaIkv-Fy2WkWUtPfDLv3lomF6kFjHucMU2rn64wKQAjHQNSDYS-kn7jV16SX-oPi8/exec", {
+        fetch("YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL", {
             method: "POST",
-            mode: "no-cors",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name, lunch, note })
-        });
-
-        alert("Thank you! Your lunch choice has been submitted.");
-        document.getElementById("quickLunchForm").reset();
+        })
+            .then(response => {
+                if (!response.ok) throw new Error("Network error");
+                alert("Thank you! Your lunch choice has been submitted.");
+                document.getElementById("quickLunchForm").reset();
+            })
+            .catch(error => {
+                alert("Submission failed. Please try again or contact support.");
+                console.error("Error submitting ad hoc lunch:", error);
+            });
     }
 </script>
 </body>
