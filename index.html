@@ -74,6 +74,28 @@
             margin-top: 1rem;
             cursor: pointer;
         }
+
+        .lunch-label {
+            text-align: left;
+            margin-top: 1rem;
+        }
+
+        .lunch-description {
+            font-weight: normal;
+            font-size: 0.9rem;
+            color: #555;
+            margin-left: 1.5rem;
+        }
+
+        .allergen-icon {
+            display: inline-block;
+            background-color: #eee;
+            color: #333;
+            font-size: 0.75rem;
+            border-radius: 4px;
+            padding: 2px 6px;
+            margin: 2px;
+        }
     </style>
 </head>
 <body>
@@ -97,10 +119,56 @@
     <div id="lunchSection" class="hidden">
         <h3>Sunday Boxed Lunch Selection</h3>
         <form id="lunchForm" onsubmit="submitLunch(event)">
-            <label><input type="radio" name="lunch" value="Grilled Chicken Caesar Wrap" required /> Grilled Chicken Caesar Wrap</label>
-            <label><input type="radio" name="lunch" value="Falafel, Tzatziki and Hummus Wrap" /> Falafel, Tzatziki and Hummus Wrap</label>
-            <label><input type="radio" name="lunch" value="Beef, Cheddar and Slaw Ciabatta" /> Beef, Cheddar and Slaw Ciabatta</label>
-            <label><input type="radio" name="lunch" value="Other" onclick="toggleOther(true)" /> OTHER - I have a dietary need</label>
+            <label class="lunch-label">
+                <input type="radio" name="lunch" value="Grilled Chicken Caesar Wrap" required />
+                Grilled Chicken Caesar Wrap
+                <div class="lunch-description">
+                    Grilled chicken with romaine, parmesan, Caesar dressing and croutons in a hearty grain tortilla<br>
+                    <strong>Contains:</strong>
+                    <span class="allergen-icon">Eggs</span>
+                    <span class="allergen-icon">Fish</span>
+                    <span class="allergen-icon">Gluten</span>
+                    <span class="allergen-icon">Milk</span>
+                    <span class="allergen-icon">MSG</span>
+                    <span class="allergen-icon">Mustard</span>
+                    <span class="allergen-icon">Soybean</span>
+                    <span class="allergen-icon">Sulphites</span>
+                    <span class="allergen-icon">Wheat</span>
+                </div>
+            </label>
+            <label class="lunch-label">
+                <input type="radio" name="lunch" value="Falafel, Tzatziki and Hummus Wrap" />
+                Falafel, Tzatziki and Hummus Wrap
+                <div class="lunch-description">
+                    Falafels with hummus, roasted red peppers, greens and lemon vinaigrette in a flour tortilla<br>
+                    <strong>Contains:</strong>
+                    <span class="allergen-icon">Gluten</span>
+                    <span class="allergen-icon">Milk</span>
+                    <span class="allergen-icon">Sesame</span>
+                    <span class="allergen-icon">Soybean</span>
+                    <span class="allergen-icon">Sulphites</span>
+                    <span class="allergen-icon">Wheat</span>
+                </div>
+            </label>
+            <label class="lunch-label">
+                <input type="radio" name="lunch" value="Beef, Cheddar and Slaw Ciabatta" />
+                Beef, Cheddar and Slaw Ciabatta
+                <div class="lunch-description">
+                    Roast beef and cheddar cheese with horseradish and coleslaw on a ciabatta roll<br>
+                    <strong>Contains:</strong>
+                    <span class="allergen-icon">Eggs</span>
+                    <span class="allergen-icon">Fish</span>
+                    <span class="allergen-icon">Gluten</span>
+                    <span class="allergen-icon">Milk</span>
+                    <span class="allergen-icon">Mustard</span>
+                    <span class="allergen-icon">Soybean</span>
+                    <span class="allergen-icon">Wheat</span>
+                </div>
+            </label>
+            <label class="lunch-label">
+                <input type="radio" name="lunch" value="Other" onclick="toggleOther(true)" />
+                OTHER - I have a dietary need that is not accommodated by these options.
+            </label>
 
             <textarea id="otherDiet" class="hidden" placeholder="Please describe your dietary need"></textarea>
             <button type="submit">Submit Lunch Choice</button>
@@ -183,7 +251,7 @@
         const lunch = document.querySelector('input[name="lunch"]:checked').value;
         const note = lunch === "Other" ? otherDiet.value.trim() : "";
 
-        fetch("https://script.google.com/macros/s/AKfycbzjaIkv-Fy2WkWUtPfDLv3lomF6kFjHucMU2rn64wKQAjHQNSDYS-kn7jV16SX-oPi8/exec", {
+        fetch("YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL", {
             method: "POST",
             mode: "no-cors",
             headers: { "Content-Type": "application/json" },
