@@ -289,7 +289,7 @@
         const lunch = document.querySelector('input[name="lunch"]:checked').value;
         const note = lunch === "Other" && otherDiet ? otherDiet.value.trim() : "";
 
-        fetch("https://script.google.com/macros/s/AKfycbzjaIkv-Fy2WkWUtPfDLv3lomF6kFjHucMU2rn64wKQAjHQNSDYS-kn7jV16SX-oPi8/exec", {
+        fetch("https://script.google.com/macros/s/AKfycbz81ArrQuNHRjYZKUHJZ_jSeWoWSu1-SvnPt58cMYb5ev2qj6qlGYMBWFca-Z3xSWC5/exec", {
             method: "POST",
             mode: "no-cors",
             headers: { "Content-Type": "application/json" },
