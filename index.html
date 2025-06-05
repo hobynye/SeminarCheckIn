@@ -220,7 +220,7 @@
     let formMap = {};
     let selectedName = "";
 
-    fetch("signInMapping.csv")
+    fetch("https://raw.githubusercontent.com/hobynye/SeminarCheckIn/main/signInMapping.csv")
         .then(response => response.text())
         .then(text => {
             const rows = text.trim().split("\n");
