@@ -19,12 +19,11 @@
             color: var(--text);
             margin: 0;
             padding: 2rem;
-            line-height: 1.6;
             text-align: center;
         }
 
         .form-container {
-            max-width: 500px;
+            max-width: 600px;
             margin: 0 auto;
             background: white;
             padding: 2rem;
@@ -39,64 +38,73 @@
 
         h2 {
             color: var(--primary);
-            margin-bottom: 1rem;
         }
 
         label {
             font-weight: 600;
-            text-align: left;
             display: block;
+            margin-top: 1rem;
         }
 
         input[type="text"],
-        select {
+        select,
+        textarea {
             width: 100%;
             padding: 0.6rem;
-            margin-bottom: 1rem;
+            margin-top: 0.5rem;
             border: 1px solid #ccc;
             border-radius: var(--border-radius);
             font-size: 1rem;
         }
 
-        input:focus,
-        select:focus {
-            outline: 2px solid var(--primary);
-            border-color: var(--primary);
+        input[type="radio"] {
+            margin-right: 0.5rem;
         }
 
-        #urlDisplay {
-            display: none;
-            margin-top: 1rem;
-            background-color: #eef;
-            padding: 1rem;
+        .hidden { display: none; }
+        .visible { display: block; }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
             border-radius: var(--border-radius);
-        }
-
-        a#formLink {
-            word-break: break-word;
-            color: var(--primary);
-            font-weight: bold;
+            font-size: 1rem;
+            margin-top: 1rem;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-
-<div class="form-container" role="form" aria-labelledby="title">
+<div class="form-container">
     <img src="hoby-logo.png" alt="HOBY NY East logo" class="logo" />
-
-    <h2 id="title">Welcome to HOBY NY East</h2>
+    <h2>Welcome to HOBY NY East</h2>
 
     <label for="searchInput">Please sign in here:</label>
-    <input type="text" id="searchInput" placeholder="Type your name..." oninput="filterDropdown()" aria-label="Search for your name" />
+    <input type="text" id="searchInput" placeholder="Type your name..." oninput="filterDropdown()" />
 
     <label for="dropdown">Matching names:</label>
-    <select id="dropdown" onchange="showURL()" aria-label="Select your name from matching options">
+    <select id="dropdown" onchange="confirmName()">
         <option value="">--Select--</option>
     </select>
 
-    <div id="urlDisplay" aria-live="polite">
+    <div id="urlDisplay" class="hidden">
         <p>Here is your form URL:</p>
-        <a href="#" id="formLink" target="_blank" rel="noopener noreferrer"></a>
+        <a href="#" id="formLink" target="_blank"></a>
+    </div>
+
+    <div id="lunchSection" class="hidden">
+        <h3>Sunday Boxed Lunch Selection</h3>
+        <form id="lunchForm" onsubmit="submitLunch(event)">
+            <label><input type="radio" name="lunch" value="Grilled Chicken Caesar Wrap" required /> Grilled Chicken Caesar Wrap</label>
+            <label><input type="radio" name="lunch" value="Falafel, Tzatziki and Hummus Wrap" /> Falafel, Tzatziki and Hummus Wrap</label>
+            <label><input type="radio" name="lunch" value="Beef, Cheddar and Slaw Ciabatta" /> Beef, Cheddar and Slaw Ciabatta</label>
+            <label><input type="radio" name="lunch" value="Other" onclick="toggleOther(true)" /> OTHER - I have a dietary need</label>
+
+            <textarea id="otherDiet" class="hidden" placeholder="Please describe your dietary need"></textarea>
+            <button type="submit">Submit Lunch Choice</button>
+        </form>
     </div>
 </div>
 
@@ -105,78 +113,87 @@
     const formLink = document.getElementById("formLink");
     const urlDisplay = document.getElementById("urlDisplay");
     const searchInput = document.getElementById("searchInput");
+    const lunchSection = document.getElementById("lunchSection");
+    const otherDiet = document.getElementById("otherDiet");
 
     let formEntries = [];
     let formMap = {};
-
-    function getLastFirst(fullName) {
-        const parts = fullName.trim().split(" ");
-        const last = parts[parts.length - 1].toLowerCase();
-        const first = parts.slice(0, -1).join(" ").toLowerCase();
-        return { last, first };
-    }
+    let selectedName = "";
 
     fetch("signInMapping.csv")
         .then(response => response.text())
         .then(text => {
             const rows = text.trim().split("\n");
-            const entries = [];
-
             for (let i = 1; i < rows.length; i++) {
                 const [label, url] = rows[i].split(",");
-                const { last, first } = getLastFirst(label);
-                entries.push({ label, url, last, first });
+                formEntries.push({ label, url });
+                formMap[label] = url;
             }
-
-            entries.sort((a, b) => {
-                if (a.last < b.last) return -1;
-                if (a.last > b.last) return 1;
-                return a.first.localeCompare(b.first);
-            });
-
-            formEntries = entries;
-            for (const entry of entries) {
-                formMap[entry.label] = entry.url;
-            }
-
-            populateDropdown(entries);
+            populateDropdown(formEntries);
         });
 
     function populateDropdown(entries) {
         dropdown.innerHTML = '<option value="">--Select--</option>';
-        for (const entry of entries) {
+        entries.forEach(entry => {
             const option = document.createElement("option");
             option.value = entry.label;
             option.textContent = entry.label;
             dropdown.appendChild(option);
-        }
+        });
     }
 
     function filterDropdown() {
         const search = searchInput.value.toLowerCase();
-        const filtered = formEntries.filter(entry =>
-            entry.label.toLowerCase().includes(search)
-        );
+        const filtered = formEntries.filter(entry => entry.label.toLowerCase().includes(search));
         populateDropdown(filtered);
 
         if (filtered.length === 1) {
             dropdown.value = filtered[0].label;
-            showURL();
-            window.open(filtered[0].url, "_blank");
+            confirmName();
         }
     }
 
-    function showURL() {
-        const selected = dropdown.value;
-        if (formMap[selected]) {
-            formLink.href = formMap[selected];
-            formLink.textContent = formMap[selected];
-            urlDisplay.style.display = "block";
+    function confirmName() {
+        const name = dropdown.value;
+        if (!name) return;
+        const confirmed = confirm(`Are you ${name}?`);
+        if (confirmed) {
+            selectedName = name;
+            formLink.href = formMap[name];
+            formLink.textContent = formMap[name];
+            urlDisplay.classList.remove("hidden");
+            lunchSection.classList.remove("hidden");
         } else {
-            urlDisplay.style.display = "none";
+            dropdown.value = "";
+            urlDisplay.classList.add("hidden");
+            lunchSection.classList.add("hidden");
         }
+    }
+
+    function toggleOther(show) {
+        if (show) {
+            otherDiet.classList.remove("hidden");
+        } else {
+            otherDiet.classList.add("hidden");
+        }
+    }
+
+    function submitLunch(e) {
+        e.preventDefault();
+        const lunch = document.querySelector('input[name="lunch"]:checked').value;
+        const note = lunch === "Other" ? otherDiet.value.trim() : "";
+
+        fetch("YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL", {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: selectedName, lunch, note })
+        });
+
+        alert("Thank you! Your lunch choice has been submitted.");
+        document.getElementById("lunchForm").reset();
+        toggleOther(false);
     }
 </script>
-
 </body>
 </html>
