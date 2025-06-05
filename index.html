@@ -133,9 +133,59 @@
 
     <div id="lunchSection" class="hidden">
         <h3>Sunday Boxed Lunch Selection</h3>
-        <!-- form unchanged -->
         <form id="lunchForm" onsubmit="submitLunch(event)">
-            <!-- form content remains unchanged -->
+            <label class="lunch-label">
+                <input type="radio" name="lunch" value="Grilled Chicken Caesar Wrap" required />
+                Grilled Chicken Caesar Wrap
+                <div class="lunch-description">
+                    Grilled chicken with romaine, parmesan, Caesar dressing and croutons in a hearty grain tortilla<br>
+                    <strong>Contains:</strong>
+                    <span class="allergen-icon">Eggs</span>
+                    <span class="allergen-icon">Fish</span>
+                    <span class="allergen-icon">Gluten</span>
+                    <span class="allergen-icon">Milk</span>
+                    <span class="allergen-icon">MSG</span>
+                    <span class="allergen-icon">Mustard</span>
+                    <span class="allergen-icon">Soybean</span>
+                    <span class="allergen-icon">Sulphites</span>
+                    <span class="allergen-icon">Wheat</span>
+                </div>
+            </label>
+            <label class="lunch-label">
+                <input type="radio" name="lunch" value="Falafel, Tzatziki and Hummus Wrap" />
+                Falafel, Tzatziki and Hummus Wrap
+                <div class="lunch-description">
+                    Falafels with hummus, roasted red peppers, greens and lemon vinaigrette in a flour tortilla<br>
+                    <strong>Contains:</strong>
+                    <span class="allergen-icon">Gluten</span>
+                    <span class="allergen-icon">Milk</span>
+                    <span class="allergen-icon">Sesame</span>
+                    <span class="allergen-icon">Soybean</span>
+                    <span class="allergen-icon">Sulphites</span>
+                    <span class="allergen-icon">Wheat</span>
+                </div>
+            </label>
+            <label class="lunch-label">
+                <input type="radio" name="lunch" value="Beef, Cheddar and Slaw Ciabatta" />
+                Beef, Cheddar and Slaw Ciabatta
+                <div class="lunch-description">
+                    Roast beef and cheddar cheese with horseradish and coleslaw on a ciabatta roll<br>
+                    <strong>Contains:</strong>
+                    <span class="allergen-icon">Eggs</span>
+                    <span class="allergen-icon">Fish</span>
+                    <span class="allergen-icon">Gluten</span>
+                    <span class="allergen-icon">Milk</span>
+                    <span class="allergen-icon">Mustard</span>
+                    <span class="allergen-icon">Soybean</span>
+                    <span class="allergen-icon">Wheat</span>
+                </div>
+            </label>
+            <label class="lunch-label">
+                <input type="radio" name="lunch" value="Other" onclick="toggleOther(true)" />
+                OTHER - I have a dietary need that is not accommodated by these options.
+            </label>
+            <textarea id="otherDiet" class="hidden" placeholder="Please describe your dietary need"></textarea>
+            <button type="submit">Submit Lunch Choice</button>
         </form>
     </div>
 
