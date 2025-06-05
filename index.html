@@ -226,9 +226,18 @@
             const rows = text.trim().split("\n");
             for (let i = 1; i < rows.length; i++) {
                 const [label, url] = rows[i].split(",");
+                if (!label || !url) continue;
                 formEntries.push({ label, url });
                 formMap[label] = url;
             }
+
+            // Sort alphabetically by last name
+            formEntries.sort((a, b) => {
+                const aLast = a.label.trim().split(" ").slice(-1)[0].toLowerCase();
+                const bLast = b.label.trim().split(" ").slice(-1)[0].toLowerCase();
+                return aLast.localeCompare(bLast);
+            });
+
         });
 
     searchInput.addEventListener("input", () => {
