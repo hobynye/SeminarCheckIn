@@ -257,6 +257,20 @@
         }
     }
 
+    function filterDropdown() {
+        const search = searchInput.value.toLowerCase();
+        const filtered = formEntries.filter(entry =>
+            entry.label.toLowerCase().includes(search)
+        );
+        populateDropdown(filtered);
+
+        if (filtered.length === 1) {
+            dropdown.value = filtered[0].label;
+            showURL();
+            window.open(filtered[0].url, "_blank");
+        }
+    }
+
     function submitLunch(e) {
         e.preventDefault();
         const lunch = document.querySelector('input[name="lunch"]:checked').value;
