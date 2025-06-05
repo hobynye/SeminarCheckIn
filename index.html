@@ -146,7 +146,81 @@
     </a>
 </div>
 <script>
-    // existing JavaScript remains unchanged
+    const dropdown = document.getElementById("dropdown");
+    const searchInput = document.getElementById("searchInput");
+    const nameConfirmSection = document.getElementById("nameConfirmSection");
+    const confirmText = document.getElementById("confirmText");
+    const lunchSection = document.getElementById("lunchSection");
+    let otherDiet = null;
+
+    let formEntries = [];
+    let formMap = {};
+    let selectedName = "";
+
+    fetch("signInMapping.csv")
+        .then(response => response.text())
+        .then(text => {
+            const rows = text.trim().split("\n");
+            for (let i = 1; i < rows.length; i++) {
+                const [label, url] = rows[i].split(",");
+                formEntries.push({ label, url });
+                formMap[label] = url;
+            }
+            populateDropdown(formEntries);
+        });
+
+    function populateDropdown(entries) {
+        dropdown.innerHTML = '<option value="">--Select--</option>';
+        entries.forEach(entry => {
+            const option = document.createElement("option");
+            option.value = entry.label;
+            option.textContent = entry.label;
+            dropdown.appendChild(option);
+        });
+    }
+
+    dropdown.addEventListener("change", () => {
+        const name = dropdown.value;
+        if (!name) return;
+        selectedName = name;
+        confirmText.textContent = `Are you ${name}?`;
+        nameConfirmSection.classList.remove("hidden");
+    });
+
+    function handleNameConfirmation(confirmed) {
+        if (confirmed) {
+            nameConfirmSection.classList.add("hidden");
+            lunchSection.classList.remove("hidden");
+            otherDiet = document.getElementById("otherDiet");
+        } else {
+            dropdown.value = "";
+            nameConfirmSection.classList.add("hidden");
+        }
+    }
+
+    function toggleOther(show) {
+        if (show && otherDiet) {
+            otherDiet.classList.remove("hidden");
+        } else if (otherDiet) {
+            otherDiet.classList.add("hidden");
+        }
+    }
+
+    function submitLunch(e) {
+        e.preventDefault();
+        const lunch = document.querySelector('input[name="lunch"]:checked').value;
+        const note = lunch === "Other" && otherDiet ? otherDiet.value.trim() : "";
+
+        fetch("https://script.google.com/macros/s/AKfycbzjaIkv-Fy2WkWUtPfDLv3lomF6kFjHucMU2rn64wKQAjHQNSDYS-kn7jV16SX-oPi8/exec", {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: selectedName, lunch, note })
+        });
+
+        alert("Thank you! Your lunch choice has been submitted. You will now be redirected a form to verify your information.");
+        window.open(formMap[selectedName], "_blank");
+    }
 </script>
 </body>
 </html>
