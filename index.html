@@ -225,7 +225,7 @@
         .then(text => {
             const rows = text.trim().split("\n");
             for (let i = 1; i < rows.length; i++) {
-                const [label, url] = rows[i].split(",");
+                const [label, url] = rows[i].split("\t");
                 if (!label || !url) continue;
                 formEntries.push({ label, url });
                 formMap[label] = url;
