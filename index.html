@@ -151,62 +151,11 @@
         <button onclick="handleNameConfirmation(false)">No, go back</button>
     </div>
 
-    <div id="lunchSection" class="hidden">
-        <h3>Sunday Boxed Lunch Selection</h3>
-        <h4>Sunday boxed lunches are only for the HOBY ambassador, not family or guests.</h4>
-        <form id="lunchForm" onsubmit="submitLunch(event)">
-            <!-- sandwich options here - unchanged for brevity -->
-            <label class="lunch-label">
-                <input type="radio" name="lunch" value="Grilled Chicken Caesar Wrap" required />
-                Grilled Chicken Caesar Wrap
-                <div class="lunch-description">
-                    Grilled chicken with romaine, parmesan, Caesar dressing and croutons in a hearty grain tortilla<br>
-                    <strong>Contains:</strong>
-                    <span class="allergen-icon">Eggs</span><span class="allergen-icon">Fish</span><span class="allergen-icon">Gluten</span><span class="allergen-icon">Milk</span><span class="allergen-icon">MSG</span><span class="allergen-icon">Mustard</span><span class="allergen-icon">Soybean</span><span class="allergen-icon">Sulphites</span><span class="allergen-icon">Wheat</span>
-                </div>
-            </label>
-            <label class="lunch-label">
-                <input type="radio" name="lunch" value="Falafel, Tzatziki and Hummus Wrap" />
-                Falafel, Tzatziki and Hummus Wrap
-                <div class="lunch-description">
-                    Falafels with hummus, roasted red peppers, greens and lemon vinaigrette in a flour tortilla<br>
-                    <strong>Contains:</strong>
-                    <span class="allergen-icon">Gluten</span><span class="allergen-icon">Milk</span><span class="allergen-icon">Sesame</span><span class="allergen-icon">Soybean</span><span class="allergen-icon">Sulphites</span><span class="allergen-icon">Wheat</span>
-                </div>
-            </label>
-            <label class="lunch-label">
-                <input type="radio" name="lunch" value="Beef, Cheddar and Slaw Ciabatta" />
-                Beef, Cheddar and Slaw Ciabatta
-                <div class="lunch-description">
-                    Roast beef and cheddar cheese with horseradish and coleslaw on a ciabatta roll<br>
-                    <strong>Contains:</strong>
-                    <span class="allergen-icon">Eggs</span><span class="allergen-icon">Fish</span><span class="allergen-icon">Gluten</span><span class="allergen-icon">Milk</span><span class="allergen-icon">Mustard</span><span class="allergen-icon">Soybean</span><span class="allergen-icon">Wheat</span>
-                </div>
-            </label>
-            <label class="lunch-label">
-                <input type="radio" name="lunch" value="Other" onclick="toggleOther(true)" />
-                OTHER - I have a dietary need that is not accommodated by these options.
-            </label>
-            <textarea id="otherDiet" class="hidden" placeholder="Please describe your dietary need"></textarea>
-            <button type="submit">Submit Lunch Choice</button>
-        </form>
-    </div>
-
     <div id="confirmationSection" class="hidden">
-        <h3>✅ Lunch Choice Submitted!</h3>
-        <p>Thank you, <span id="confirmedName"></span>.</p>
-        <p style="font-size: 1.2rem; font-weight: bold; color: var(--accent); margin-top: 1rem;">
-            🚨 Next Step: Complete your final verification form!
-        </p>
         <p>You will be redirected in <span id="countdown">5</span> seconds...</p>
         <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
     </div>
 
-    <div class="divider"></div>
-    <p><strong>Staff Only:</strong> If you are a HOBY staff member and do not appear in the list above, please use this link to submit your lunch choice:</p>
-    <a href="https://docs.google.com/forms/d/e/1FAIpQLSe3waCG74woARqo3TPaTlL54JivEHozgUDZR8yB-3Cw1jvZYg/viewform" target="_blank">
-        <button type="button" class="small-button">Submit Staff Lunch Choice</button>
-    </a>
 </div>
 
 <script>
@@ -214,7 +163,6 @@
     const suggestions = document.getElementById("suggestions");
     const nameConfirmSection = document.getElementById("nameConfirmSection");
     const confirmText = document.getElementById("confirmText");
-    const lunchSection = document.getElementById("lunchSection");
     const confirmationSection = document.getElementById("confirmationSection");
     const confirmedNameEl = document.getElementById("confirmedName");
     const countdownEl = document.getElementById("countdown");
@@ -268,8 +216,20 @@
     function handleNameConfirmation(confirmed) {
         if (confirmed) {
             nameConfirmSection.classList.add("hidden");
-            lunchSection.classList.remove("hidden");
-            otherDiet = document.getElementById("otherDiet");
+            confirmationSection.classList.remove("hidden");
+
+            let seconds = 5;
+            progressFill.style.width = "0%";
+            const interval = setInterval(() => {
+                seconds--;
+                countdownEl.textContent = seconds;
+                progressFill.style.width = `${(5 - seconds) * 20}%`;
+                if (seconds === 0) {
+                    clearInterval(interval);
+                    window.open(formMap[selectedName], "_blank");
+                }
+            }, 1000);
+
         } else {
             searchInput.value = "";
             nameConfirmSection.classList.add("hidden");
@@ -282,35 +242,6 @@
         } else if (otherDiet) {
             otherDiet.classList.add("hidden");
         }
-    }
-
-    function submitLunch(e) {
-        e.preventDefault();
-        const lunch = document.querySelector('input[name="lunch"]:checked').value;
-        const note = lunch === "Other" && otherDiet ? otherDiet.value.trim() : "";
-
-        fetch("https://script.google.com/macros/s/AKfycbz81ArrQuNHRjYZKUHJZ_jSeWoWSu1-SvnPt58cMYb5ev2qj6qlGYMBWFca-Z3xSWC5/exec", {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name: selectedName, lunch, note })
-        });
-
-        lunchSection.classList.add("hidden");
-        confirmedNameEl.textContent = selectedName;
-        confirmationSection.classList.remove("hidden");
-
-        let seconds = 5;
-        progressFill.style.width = "0%";
-        const interval = setInterval(() => {
-            seconds--;
-            countdownEl.textContent = seconds;
-            progressFill.style.width = `${(5 - seconds) * 20}%`;
-            if (seconds === 0) {
-                clearInterval(interval);
-                window.open(formMap[selectedName], "_blank");
-            }
-        }, 1000);
     }
 </script>
 </body>
