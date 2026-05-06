@@ -173,22 +173,32 @@
     let formMap = {};
     let selectedName = "";
 
-    fetch("https://script.google.com/macros/s/AKfycby-3MzAohYE6eIVJ4x1D9eJGMLkRbmEFqWIG8bzADEYvlZ8Yi7Y4mUR774mQPQ0Zvo/exec")
-        .then(response => response.text())
-        .then(text => {
-            const rows = text.trim().split("\n");
-            for (let i = 1; i < rows.length; i++) {
-                const [label, url] = rows[i].split("\t");
-                if (!label || !url) continue;
-                formEntries.push({ label, url });
-                formMap[label] = url;
-            }
-            formEntries.sort((a, b) => {
-                const aLast = a.label.trim().split(" ").slice(-1)[0].toLowerCase();
-                const bLast = b.label.trim().split(" ").slice(-1)[0].toLowerCase();
-                return aLast.localeCompare(bLast);
-            });
+    function loadSignInMapping(entries) {
+
+        formEntries = entries;
+        formMap = {};
+
+        formEntries.forEach(entry => {
+            formMap[entry.label] = entry.url;
         });
+
+        formEntries.sort((a, b) => {
+            const aLast = a.label.trim().split(" ").slice(-1)[0].toLowerCase();
+            const bLast = b.label.trim().split(" ").slice(-1)[0].toLowerCase();
+
+            return aLast.localeCompare(bLast);
+        });
+
+        console.log("Loaded entries:", formEntries.length);
+    }
+
+    // Dynamically load Apps Script JSONP endpoint
+    const script = document.createElement("script");
+
+    script.src =
+        "https://script.google.com/macros/s/AKfycby-3MzAohYE6eIVJ4x1D9eJGMLkRbmEFqWIG8bzADEYvlZ8Yi7Y4mUR774mQPQ0Zvo/exec?callback=loadSignInMapping";
+
+    document.body.appendChild(script);
 
     searchInput.addEventListener("input", () => {
         const search = searchInput.value.toLowerCase();
