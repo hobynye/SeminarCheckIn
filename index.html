@@ -173,7 +173,7 @@
     let formMap = {};
     let selectedName = "";
 
-    fetch("signInMapping.csv")
+    fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vTnAJZjytg7GcgEAcWiBSPwoMCvQqQsMF4ZqeX3upyz85P7E_1QaUMkgllmz_h8gtwcou0JpPXAtcWH/pub?gid=0&single=true&output=csv")
         .then(response => response.text())
         .then(text => {
             const rows = text.trim().split("\n");
